@@ -2,7 +2,6 @@ import os
 import time
 import argparse
 import subprocess
-import contextlib
 
 __version__ = '0.0.1'
 
@@ -29,29 +28,30 @@ cd ..
 rm -rf Python-{v}
 '''
 
-@contextlib.contextmanager
-def install(version):
-    fp = 'pipy_{v}_{t}.sh'.format(v=version, t=int(time.time()))
-
-    with open(fp, 'w') as inf:
-        inf.write(_BASH_FILE.format(v=version).strip())
-        inf.write('\n')
-
-    yield fp
-
 def main(args):
     if os.getuid():
         print('you cannot perform this operation unless you are root.')
         return
 
-    with install(args.version) as fp:
-        if args.deps:
-            subprocess.check_output(' && '.join(cmd for cmd in _BASH_DEPENDENCIES.split('\n')), shell=True)
+    version = args.version
+    fp = 'pipy_{v}_{t}.sh'.format(v=version, t=int(time.time()))
 
+    with open(fp, 'w') as inf:
+        if args.deps:
+            inf.write(_BASH_DEPENDENCIES)
+
+        inf.write(_BASH_FILE.format(v=version).strip())
+        inf.write('\n')
+
+    if args.run:
+        print('Running bash file => {fp}'.format(fp=fp))
         subprocess.check_output('bash %s' % fp, shell=True)
+    else:
+        print('Done generating bash file!\nUse: bash {fp}'.format(fp=fp))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('version', metavar='version', help='The version to try and install.')
+    parser.add_argument('--run', dest='run', action='store_true', default=False, help='Run the bash file generated.')
     parser.add_argument('--all', dest='deps', action='store_true', default=False, help='Install all dependencies.')
     main(parser.parse_args())
