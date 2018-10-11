@@ -51,7 +51,7 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('version', metavar='version', help='The version to try and install.')
     parser.add_argument('--run', dest='run', action='store_true', default=False, help='Run the bash file generated.')
     parser.add_argument('--all', dest='deps', action='store_true', default=False, help='Install all dependencies.')
+    parser.add_argument('version', metavar='version', help='The version to try and install.')
     main(parser.parse_args())
